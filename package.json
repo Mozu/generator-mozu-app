@@ -9,6 +9,7 @@
     "email": "james_zetlen@volusion.com",
     "url": "https://github.com/zetlen"
   },
+  "main": "generators/app/index.js",
   "engines": {
     "node": ">=0.10.0"
   },
