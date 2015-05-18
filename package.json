@@ -1,0 +1,41 @@
+{
+  "name": "generator-mozu-extension",
+  "version": "0.6.0",
+  "description": "Yeoman generator for Mozu Extensions",
+  "license": "MIT",
+  "repository": "git+http://tfs.corp.volusion.com:8080/tfs/VNext/Prototype/_git/generator-mozu-extension",
+  "author": {
+    "name": "James Zetlen",
+    "email": "zetlen@gmail.com",
+    "url": "https://github.com/zetlen"
+  },
+  "engines": {
+    "node": ">=0.10.0"
+  },
+  "scripts": {
+    "test": "mocha"
+  },
+  "files": [
+    "generators",
+    "utils"
+  ],
+  "keywords": [
+    "yeoman-generator"
+  ],
+  "dependencies": {
+    "buffered-spawn": "^1.0.1",
+    "chalk": "^1.0.0",
+    "inquirer": "^0.8.0",
+    "lodash.merge": "^3.1.0",
+    "mosay": "^2.1.0",
+    "mozu-node-sdk": "^1.15.15052-hotfix12",
+    "mozuxd-metadata": "^1.17.2-dev1504272200-s",
+    "quick-git-hits": "^0.1.0",
+    "semver": "^4.3.1",
+    "update-notifier": "^0.3.1",
+    "yeoman-generator": "^0.18.9"
+  },
+  "devDependencies": {
+    "mocha": "*"
+  }
+}
