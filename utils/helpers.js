@@ -23,6 +23,17 @@ module.exports = {
       });
     }
   },
+  makeSDKContext: function(self) {
+    return {
+      appKey: self['_' + self.developerInfoKeys.AppKey],
+      sharedSecret: self['_' + self.developerInfoKeys.SharedSecret],
+      baseUrl: 'https://' + self._mozuEnv.domain,
+      developerAccountId: self._developerAccountId,
+      developerAccount: {
+        emailAddress: self['_' + self.developerInfoKeys.AccountLogin]
+      }
+    };
+  },
   trimString: function(str) {
     return str.trim();
   },

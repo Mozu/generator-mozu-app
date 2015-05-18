@@ -25,6 +25,7 @@ module.exports = yeoman.generators.Base.extend({
 
     this.helpers = Object.keys(helpers).reduce(function(obj, name) {
       obj[name] = helpers[name].bind(this);
+      return obj;
     }.bind(this), {});
 
     // This option adds support for non-production environments
@@ -58,17 +59,20 @@ module.exports = yeoman.generators.Base.extend({
     } catch(e) {
       this._package = {};
     }
-    quickGitHits.detectDirectory(this.destinationPath(), function(err, result) {
-        if (err) {
-          throw err;
-        }
-        helpers.addAsPrivateProps(this, result);
-        done();
-      }.bind(this));
+    if (this.options.quick) {
+      this.options['skip-install'] = this.options['skip-prompts'] = true;
+    }
+  },
 
-      if (this.options.quick) {
-        this.options['skip-install'] = this.options['skip-prompts'] = true;
+  acquireGitStatus: function() {
+    var done = this.async();
+    quickGitHits.detectDirectory(this.destinationPath(), function(err, result) {
+      if (err) {
+        throw err;
       }
+      helpers.addAsPrivateProps(this, result);
+      done();
+    }.bind(this));
   },
 
   displayMozuBanner: function(message) {
@@ -83,12 +87,13 @@ module.exports = yeoman.generators.Base.extend({
     }
 
     this.log(mosay(message));
-  }
+  },
 
 
   promptForEnvironment: function(cb) {
 
     var self = this;
+    if (!cb) cb = this.async();
 
     function done() {
       self.developerInfoKeys = [
@@ -97,6 +102,7 @@ module.exports = yeoman.generators.Base.extend({
         'SharedSecret'
       ].reduce(function(memo, keyName) {
         memo[keyName] = self._mozuEnv.name + '_' + keyName;
+        return memo;
       }, {});
       cb();
     }
@@ -121,7 +127,7 @@ module.exports = yeoman.generators.Base.extend({
 
     } else {
 
-      if (!prodHomePod) {
+      if (!PROD_HOMEPOD) {
         throw new Error("Metadata package does not contain a home pod URL for `Production/Sandbox` environment.");
       }
 
@@ -136,10 +142,10 @@ module.exports = yeoman.generators.Base.extend({
 
   },
 
-  promptForDeveloperAccount: function() {
+  promptForDeveloperAccount: function(cb) {
 
     var self = this;
-    var done = this.async();
+    var done = cb || this.async();
 
     var prompts = [{
       type: 'input',
@@ -176,7 +182,7 @@ module.exports = yeoman.generators.Base.extend({
           }
         }], function() {
           helpers.remark(self, 'Looking up developer accounts...');
-          var context = self._makeSDKContext();
+          var context = helpers.makeSDKContext(self);
           context.developerAccount.password = self._password;
           var p = SDK.client(context)
             .platform()
@@ -192,6 +198,7 @@ module.exports = yeoman.generators.Base.extend({
                     value: acct.id
                   };
                 });
+
                 helpers.promptAndSaveResponse(self, [{
                   type: 'list',
                   name: 'developerAccountId',
@@ -219,11 +226,27 @@ module.exports = yeoman.generators.Base.extend({
 
   },
 
+  promptForGitRepo: function(done) {
+
+    done = done || this.async();
+
+    helpers.promptAndSaveResponse(this, [{
+      type: 'confirm',
+      name: 'createGit',
+      message: 'Create Git repository?',
+      filter: helpers.trimString,
+      when: (function() {
+        return this._gitInstalled && !this._inGitRepo && this.config.get('createGit') !== false;
+      }.bind(this))
+    }], done);
+
+  },
+
   saveMozuConfig: function(extras) {
     if (!this.options['skip-prompts']) {
       this.fs.writeJSON(
         this.destinationPath('mozu.config.json'),
-        this._mergeObjects(this._makeSDKContext(), extras || {});
+        helpers.merge(helpers.makeSDKContext(this), extras || {})
       );
       this.config.set('homePod', this._mozuEnv.domain || PROD_HOMEPOD);
       this.config.set('applicationKey', this._applicationKey);
@@ -232,22 +255,9 @@ module.exports = yeoman.generators.Base.extend({
     }
   },
 
-  _mergeObjects: merge,
-  
-
-  _makeSDKContext: function() {
-    return {
-      appKey: this[this.developerInfoKeys.AppKey],
-      sharedSecret: this[this.developerInfoKeys.SharedSecret],
-      baseUrl: 'https://' + this._mozuEnv.domain,
-      developerAccountId: this._developerAccountId,
-      developerAccount: {
-        emailAddress: this[this.developerInfoKeys.AccountLogin]
-      }
-    };
-  },
-
   createRepoIfRequested: function(done) {
+    if (!done) done = this.async();
+    console.log('got here');
     if (this._createGit) {
       quickGitHits.createRepoInDirectory(this.destinationPath(), { repositoryUrl: this._repositoryUrl }, function(err) {
         if (err) {
@@ -262,8 +272,6 @@ module.exports = yeoman.generators.Base.extend({
     } else {
       done();
     }
-  },
-
-
+  }
 
 });
