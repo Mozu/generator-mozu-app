@@ -1,8 +1,8 @@
-# Mozu Extension generator
+# Mozu App generator
 
 Maintainer: [James Zetlen](https://github.com/zetlen)
 
-A Mozu Extension generator for Yeoman that provides boilerplate and structure for writing Mozu Custom Functions against the family of Mozu Extension Actions. It provides documented function stubs, a build process using Grunt and Browserify, remote sync with the Developer Center, and unit tests using Nodeunit or Mocha plus the Mozu Extension Simulator.
+A Mozu App Generator that scaffolds a directory with some basic tools common to all types of Mozu App (Integrations, Extensions/Actions, and Themes). 
 
 ## This package is currently a prerelease.
 **This contains pre-release code. It may have behaviors or rely on features that don't work in Mozu production environments. Use with caution!**
@@ -17,16 +17,20 @@ First, install [Yeoman](http://yeoman.io)'s command line tool if you haven't alr
 npm install -g yo
 ```
 
-Yeoman looks for globally installed NPM packages that identify themselves as Yeoman generators. 
+Yeoman looks for globally installed NPM packages that identify themselves as Yeoman generators. So globally install the mozu-app package!
+
+```bash
+npm install -g generator-mozu-app
+```
 
 Make a new directory and `cd` into it:
 ```
 mkdir new-mozu-ext && cd new-mozu-ext
 ```
 
-Run `yo mozu-extension`:
+Run `yo mozu-app`:
 ```
-yo mozu-extension
+yo mozu-app
 ```
 
 ## Options
@@ -46,14 +50,3 @@ yo mozu-extension
 * `--internal`
 
   Allows integration with non-production Mozu environments. The prompts will include an extra question about which environment to sync with.
-
-
-## Creating Additional Actions
-
-The generator uses a Yeoman sub-generator to create the action implementation scaffolds and unit test scaffolds. You can call this sub-generator directly, after creating your project, to add more scaffolding for additional actions:
-
-```
-yo mozu-extension:action
-```
-
-This will prompt you to add to your list of actions, and then will write the additional action scaffolds.

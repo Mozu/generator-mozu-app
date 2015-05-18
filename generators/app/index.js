@@ -2,7 +2,6 @@
 var yeoman = require('yeoman-generator');
 var chalk = require('chalk');
 var mosay = require('mosay');
-var semver = require('semver');
 var XDMetadata = require('mozuxd-metadata');
 var quickGitHits = require('quick-git-hits');
 var SDK = require('mozu-node-sdk');
