@@ -29,8 +29,8 @@
     "chalk": "^1.0.0",
     "lodash.merge": "^3.1.0",
     "mosay": "^2.1.0",
-    "mozu-node-sdk": "^1.17.1512-4.0-hotfix3",
-    "mozuxd-metadata": "^1.17.2-dev1504272200-s",
+    "mozu-metadata": "^1.17.4-dev1505181422-s2",
+    "mozu-node-sdk": "^1.17.15154-hotfix1",
     "quick-git-hits": "^0.1.0",
     "yeoman-generator": "^0.18.9"
   },
