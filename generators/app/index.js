@@ -2,7 +2,7 @@
 var yeoman = require('yeoman-generator');
 var chalk = require('chalk');
 var mosay = require('mosay');
-var XDMetadata = require('mozuxd-metadata');
+var XDMetadata = require('mozu-metadata');
 var quickGitHits = require('quick-git-hits');
 var SDK = require('mozu-node-sdk');
 
@@ -168,7 +168,7 @@ module.exports = yeoman.generators.Base.extend({
             helpers.remark(self, 'Looking up developer accounts...');
             var context = helpers.makeSDKContext(self);
             context.developerAccount.password = self._password;
-            var p = SDK.client(context)
+            var p = SDK.client(context, { plugins: [require('mozu-node-sdk/plugins/fiddler-proxy')] })
               .platform()
               .developer()
               .developerAdminUserAuthTicket()
@@ -192,14 +192,14 @@ module.exports = yeoman.generators.Base.extend({
                   }], done);
                 }
               }, function(err) {
-                if (err.originalError && err.originalError.errorCode === "INVALID_CREDENTIALS") {
+                if (err && err.originalError && err.originalError.errorCode === "INVALID_CREDENTIALS") {
                   // terrible, awful, but can't figure out the lifecycle here and when.js is logging
                   // a potential pending rejection which messes up the prompt
                   SDK.suppressUnhandledRejections();
                   helpers.lament(self, 'Invalid credentials. Retry password (or Ctrl-C to quit).')
                   return getDeveloperAccountId();
                 } else {
-                  helpers.lament(self, err.message);
+                  helpers.lament(self, (err && (err.message || err.toString())) || "Unknown error! Please try again later.");
                   process.exit(1);
                 }
               });
