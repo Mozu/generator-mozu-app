@@ -246,11 +246,10 @@ module.exports = yeoman.generators.Base.extend({
 
   },
 
-  installing: {
+  install: {
 
     createRepoIfRequested: function(done) {
       if (!done) done = this.async();
-      console.log('got here');
       if (this._createGit) {
         quickGitHits.createRepoInDirectory(this.destinationPath(), { repositoryUrl: this._repositoryUrl }, function(err) {
           if (err) {
