@@ -51,7 +51,7 @@ module.exports = {
   lament: function(ctx, str, e) {
     ctx.log(chalk.bold.red(str + '\n'));
     if (process.env.NODE_DEBUG && process.env.NODE_DEBUG.indexOf('mozu-app') !== -1) {
-      ctx.log(e && require('util').inspect(e, { depth: 4 }));
+      ctx.log(e && chalk.bold.red('Details: \n' + require('util').inspect(e, { depth: 4 })));
     }
   }
 };

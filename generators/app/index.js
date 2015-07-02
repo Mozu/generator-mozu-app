@@ -260,7 +260,7 @@ module.exports = yeoman.generators.Base.extend({
                   // terrible, awful, but can't figure out the lifecycle here and when.js is logging
                   // a potential pending rejection which messes up the prompt
                   SDK.suppressUnhandledRejections();
-                  helpers.lament(self, 'Invalid credentials. Retry password (or Ctrl-C to quit).')
+                  helpers.lament(self, 'Invalid credentials. Retry password (or Ctrl-C to quit).', err.originalError)
                   return getDeveloperAccountId();
                 } else {
                   helpers.lament(self, (err && (err.message || err.toString())) || "Unknown error! Please try again later.", err);
