@@ -1,0 +1,9 @@
+{
+  "appKey": "bd63528.zdev.1.0.0.release",
+  "sharedSecret": "ea19bad1695849268f911c0bd0b8aede",
+  "baseUrl": "https://home.mozu.com",
+  "developerAccountId": 2322,
+  "developerAccount": {
+    "emailAddress": "james_zetlen@volusion.com"
+  }
+}

@@ -1,9 +1,11 @@
 'use strict';
+var url = require('url');
 var yeoman = require('yeoman-generator');
 var chalk = require('chalk');
 var mosay = require('mosay');
 var XDMetadata = require('mozu-metadata');
 var quickGitHits = require('quick-git-hits');
+var semver = require('semver');
 var SDK = require('mozu-node-sdk');
 
 var helpers = require('../../utils/helpers');
@@ -31,6 +33,11 @@ module.exports = yeoman.generators.Base.extend({
       hide: true
     });
 
+    this.option('developerAccountId', {
+      desc: 'For testing',
+      hide: true
+    });
+
     this.option('skip-prompts', {
       type: 'Boolean',
       desc: 'Skip prompts. Only use this option if you are re-running the generator!',
@@ -49,18 +56,27 @@ module.exports = yeoman.generators.Base.extend({
       defaults: false
     });
 
-    this.config.save();
     try {
       this._package = this.fs.readJSON(this.destinationPath('package.json'), {});
     } catch(e) {
       this._package = {};
     }
+
+    try {
+      this._mozuConfig = this.fs.readJSON(this.destinationPath('mozu.config.json'), {});
+    } catch(e) {
+      this._mozuConfig = {};
+    }
+
     if (this.options.quick) {
       this.options['skip-install'] = this.options['skip-prompts'] = true;
     }
   },
 
   initializing: {
+    notifyUpdates: function() {
+      require('update-notifier')({ pkg: require('../../package.json'), updateCheckInterval: 1}).notify({ defer: false });
+    },
     acquireGitStatus: function() {
       var done = this.async();
       quickGitHits.detectDirectory(this.destinationPath(), function(err, result) {
@@ -88,10 +104,58 @@ module.exports = yeoman.generators.Base.extend({
 
   prompting: {
 
+    promptForAppDetails: function(cb) {
+      var done = this.async();
+
+      var prompts = [{
+        type: 'input',
+        name: 'name',
+        message: 'Name this Mozu Application (no spaces):',
+        default: this._package.name || this.appname && this.appname.replace(/\s/g,'-'),
+        filter: helpers.trimString,
+        validate: function(name) {
+          return !!name.match(/^[A-Za-z0-9\-_\.]+$/) || 'That may not be a legal npm package name.';
+        }
+      }, {
+        type: 'input',
+        name: 'description',
+        message: 'Short description:',
+        default: this._package.description || 'A Mozu Application containing Actions.'
+      }, {
+        type: 'input',
+        name: 'version',
+        message: 'Initial version:',
+        default: this._package.version || '0.1.0',
+        filter: helpers.trimString,
+        validate: function(ver) {
+          return !!semver.valid(ver) || 'Please supply a valid semantic version of the form major.minor.patch-annotation.\n\nExamples: 0.1.0, 3.21.103, 3.9.22-alt';
+        }
+      }, {
+        type: 'input',
+        name: 'applicationKey',
+        message: 'Developer Center Application Key for this Application:',
+        filter: helpers.trimString,
+        default: this._mozuConfig.workingApplicationKey
+      }];
+
+      helpers.promptAndSaveResponse(this, prompts, done);
+
+    },
+
     promptForEnvironment: function(cb) {
 
       var self = this;
       if (!cb) cb = this.async();
+
+      var environmentNames = Object.keys(XDMetadata.environments);
+      var currentMozuEnv = PROD_NAME;
+      var currentHomepod = this._mozuConfig.baseUrl;
+      if (currentHomepod) {
+        currentHomepod = url.parse(currentHomepod).hostname;
+        currentMozuEnv = environmentNames.reduce(function(m, x) {
+          return (XDMetadata.environments[x].homeDomain === currentHomepod) ? x : m;
+        }, null);
+      }
 
       function done() {
         self._homePod = XDMetadata.environments[self._mozuEnv].homeDomain;
@@ -112,8 +176,8 @@ module.exports = yeoman.generators.Base.extend({
           type: 'list',
           name: 'mozuEnv',
           message: 'Select Mozu environment:',
-          default: this.config.get('mozuEnv') || PROD_NAME,
-          choices: Object.keys(XDMetadata.environments)
+          default: currentMozuEnv,
+          choices: environmentNames
         }], done);
 
       } else {
@@ -152,7 +216,7 @@ module.exports = yeoman.generators.Base.extend({
       }];
 
       helpers.promptAndSaveResponse(self, prompts, function getDeveloperAccountId() {
-        var developerAccountId = self.config.get('developerAccountId');
+        var developerAccountId = self.options.developerAccountId || self._mozuConfig.developerAccountId;
         if (developerAccountId) {
           self._developerAccountId = developerAccountId;
           done();
@@ -188,7 +252,7 @@ module.exports = yeoman.generators.Base.extend({
                     name: 'developerAccountId',
                     choices: accountChoices,
                     message: 'Select a developer account for ' + chalk.bold.cyan(self['_' + self.developerInfoKeys.AccountLogin]) + ':',
-                    default: self.config.get('developerAccountId')
+                    default: self._mozuConfig.developerAccountId
                   }], done);
                 }
               }, function(err) {
@@ -199,7 +263,7 @@ module.exports = yeoman.generators.Base.extend({
                   helpers.lament(self, 'Invalid credentials. Retry password (or Ctrl-C to quit).')
                   return getDeveloperAccountId();
                 } else {
-                  helpers.lament(self, (err && (err.message || err.toString())) || "Unknown error! Please try again later.");
+                  helpers.lament(self, (err && (err.message || err.toString())) || "Unknown error! Please try again later.", err);
                   process.exit(1);
                 }
               });
@@ -221,6 +285,10 @@ module.exports = yeoman.generators.Base.extend({
           name: 'createGit',
           message: 'Create Git repository?',
           filter: helpers.trimString
+        }, {
+          type: 'input',
+          name: 'repositoryUrl',
+          message: 'Repository Url (if available):'
         }], done);
 
       } else {
@@ -232,18 +300,47 @@ module.exports = yeoman.generators.Base.extend({
 
   configuring: {
 
-    saveMozuConfig: function() {
+    saveRc: function() {
+      this.config.set('createGit', this._createGit);
+    }
+
+  },
+
+
+  writing: {
+    
+    mozuConfig: function() {
       if (!this.options['skip-prompts']) {
         this.fs.writeJSON(
           this.destinationPath('mozu.config.json'),
           helpers.makeSDKContext(this)
         );
-        this.config.set('mozuEnv', this._mozuEnv);
-        this.config.set('developerAccountId', this._developerAccountId);
-        this.config.set('createGit', this._createGit);
       }
-    }
+    },
 
+    packagejson: function() {
+
+      var newPkg = {
+        name: this._name,
+        version: this._version,
+        description: this._description
+      };
+
+      if (this._repositoryUrl) {
+        newPkg.repository = {
+          type: 'git',
+          url: this._repositoryUrl
+        };
+      }
+
+      this.fs.writeJSON(
+        this.destinationPath('package.json'),
+        helpers.merge(
+          helpers.trimAll(newPkg),
+          this._package
+        )
+      );
+    }
   },
 
   install: {

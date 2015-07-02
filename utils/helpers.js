@@ -31,7 +31,8 @@ module.exports = {
       developerAccountId: self._developerAccountId,
       developerAccount: {
         emailAddress: self['_' + self.developerInfoKeys.AccountLogin]
-      }
+      },
+      workingApplicationKey: self._applicationKey
     };
   },
   trimString: function(str) {
@@ -47,7 +48,10 @@ module.exports = {
   remark: function(ctx, str) {
     ctx.log(chalk.green('>> ') + str + '\n');
   },
-  lament: function(ctx, str) {
+  lament: function(ctx, str, e) {
     ctx.log(chalk.bold.red(str + '\n'));
+    if (process.env.NODE_DEBUG && process.env.NODE_DEBUG.indexOf('mozu-app') !== -1) {
+      ctx.log(e && require('util').inspect(e, { depth: 4 }));
+    }
   }
 };
