@@ -7,7 +7,7 @@ A Mozu App Generator that scaffolds a directory with some basic tools common to 
 ## This package is currently a prerelease.
 **This contains pre-release code. It may have behaviors or rely on features that don't work in Mozu production environments. Use with caution!**
 
-![](http://i.imgur.com/01FRhEd.png)
+![screenshot of generator in action](http://i.imgur.com/bwJfTEW.png)
 
 ## Usage
 
