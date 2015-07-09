@@ -302,7 +302,7 @@ module.exports = yeoman.generators.Base.extend({
 
     saveRc: function() {
       this.config.set('createGit', this._createGit);
-    }
+    },
     
     mozuConfig: function() {
       if (!this.options['skip-prompts']) {
