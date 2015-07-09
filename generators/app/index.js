@@ -29,7 +29,7 @@ module.exports = yeoman.generators.Base.extend({
     });
 
     this.option('intro', {
-      defaults: 'Follow the prompts to scaffold a Mozu App package. The resulting directory will include package metadata and a sync tool.',
+      defaults: 'Follow the prompts to scaffold a Mozu Application package. When you\'re done, this directory will include package metadata and an API configuration for uploading your app.',
       hide: true
     });
 
@@ -110,7 +110,7 @@ module.exports = yeoman.generators.Base.extend({
       var prompts = [{
         type: 'input',
         name: 'name',
-        message: 'Name this Mozu Application (no spaces):',
+        message: 'Application package name (letters, numbers, dashes):',
         default: this._package.name || this.appname && this.appname.replace(/\s/g,'-'),
         filter: helpers.trimString,
         validate: function(name) {
@@ -120,7 +120,7 @@ module.exports = yeoman.generators.Base.extend({
         type: 'input',
         name: 'description',
         message: 'Short description:',
-        default: this._package.description || 'A Mozu Application containing Actions.'
+        default: this._package.description || ''
       }, {
         type: 'input',
         name: 'version',
@@ -337,7 +337,8 @@ module.exports = yeoman.generators.Base.extend({
         this.destinationPath('package.json'),
         helpers.merge(
           helpers.trimAll(newPkg),
-          this._package
+          this._package,
+          this.fs.readJSON(this.destinationPath('package.json'), this._package)
         )
       );
     }
