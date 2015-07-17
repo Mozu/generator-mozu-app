@@ -29,7 +29,7 @@
     "chalk": "^1.1.0",
     "lodash.merge": "^3.3.2",
     "mosay": "^2.1.0",
-    "mozu-metadata": "^1.18.1-dev1507171402",
+    "mozu-metadata": "latest",
     "mozu-node-sdk": "^1.17.15154-hotfix4",
     "quick-git-hits": "^0.1.1",
     "semver": "^5.0.1",
