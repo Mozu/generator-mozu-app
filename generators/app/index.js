@@ -105,7 +105,7 @@ module.exports = yeoman.generators.Base.extend({
   prompting: {
 
     promptForAppDetails: function(cb) {
-      var done = this.async();
+      var done = typeof cb === "function" ? cb : this.async();
 
       var prompts = [{
         type: 'input',
@@ -145,7 +145,7 @@ module.exports = yeoman.generators.Base.extend({
     promptForEnvironment: function(cb) {
 
       var self = this;
-      if (!cb) cb = this.async();
+      if (typeof cb !== "function") cb = this.async();
 
       var environmentNames = Object.keys(XDMetadata.environments);
       var currentMozuEnv = PROD_NAME;
@@ -193,7 +193,7 @@ module.exports = yeoman.generators.Base.extend({
     promptForDeveloperAccount: function(cb) {
 
       var self = this;
-      var done = cb || this.async();
+      var done = typeof cb === "function" ? cb : this.async();
 
       var prompts = [{
         type: 'input',
@@ -274,9 +274,9 @@ module.exports = yeoman.generators.Base.extend({
 
     },
 
-    promptForGitRepo: function(done) {
+    promptForGitRepo: function(cb) {
 
-      done = done || this.async();
+      var done = typeof cb === "function" ? cb : this.async();
 
       if (this._gitInstalled && !this._inGitRepo && this.config.get('createGit') !== false) {
 
@@ -342,7 +342,7 @@ module.exports = yeoman.generators.Base.extend({
   install: {
 
     createRepoIfRequested: function(done) {
-      if (!done) done = this.async();
+      if (typeof done !== "function") done = this.async();
       if (this._createGit) {
         quickGitHits.createRepoInDirectory(this.destinationPath(), { repositoryUrl: this._repositoryUrl }, function(err) {
           if (err) {
