@@ -56,6 +56,12 @@ module.exports = yeoman.generators.Base.extend({
       defaults: false
     });
 
+    this.option('config', {
+      type: 'Boolean',
+      alias: 'c',
+      desc: 'Only create a mozu.config.json file. Use this option for configuring existing projects to work with your own developer account.'
+    });
+
     try {
       this._package = this.fs.readJSON(this.destinationPath('package.json'), {});
     } catch(e) {
@@ -89,7 +95,9 @@ module.exports = yeoman.generators.Base.extend({
     },
     displayMozuBanner: function(message) {
       if (!message) message = this.options.intro;
-      if (this.options['skip-prompts']) {
+      if (this.options.config) {
+        message = "Follow the prompts to configure this project to connect to the Mozu APIs."
+      } else if (this.options['skip-prompts']) {
         if (!this.fs.exists('mozu.config.json')) {
           message = 'You cannot skip prompts if you have never run this generator in the current directory! Run again without the --skip-prompts or --quick options.';
           this.log(mosay(message));
@@ -107,7 +115,7 @@ module.exports = yeoman.generators.Base.extend({
     promptForAppDetails: function(cb) {
       var done = typeof cb === "function" ? cb : this.async();
 
-      var prompts = [{
+      var packagePrompts = [{
         type: 'input',
         name: 'name',
         message: 'Application package name (letters, numbers, dashes):',
@@ -130,13 +138,17 @@ module.exports = yeoman.generators.Base.extend({
         validate: function(ver) {
           return !!semver.valid(ver) || 'Please supply a valid semantic version of the form major.minor.patch-annotation.\n\nExamples: 0.1.0, 3.21.103, 3.9.22-alt';
         }
-      }, {
+      }]
+
+      var configPrompts = [{
         type: 'input',
         name: 'applicationKey',
         message: 'Developer Center Application Key for this Application:',
         filter: helpers.trimString,
         default: this._mozuConfig.workingApplicationKey
       }];
+
+      var prompts = this.options.config ? configPrompts : packagePrompts.concat(configPrompts);
 
       helpers.promptAndSaveResponse(this, prompts, done);
 
@@ -217,7 +229,11 @@ module.exports = yeoman.generators.Base.extend({
 
       helpers.promptAndSaveResponse(self, prompts, function getDeveloperAccountId() {
         var developerAccountId = self.options.developerAccountId || self._mozuConfig.developerAccountId;
-        if (developerAccountId) {
+        var oldHomepod = self._mozuConfig.baseUrl;
+        var newHomepod = self._homePod;
+        var oldAccountEmail = self._mozuConfig.developerAccount && self._mozuConfig.developerAccount.emailAddress && self._mozuConfig.developerAccount.emailAddress.trim();
+        var newAccountEmail = self['_' + self.developerInfoKeys.AccountLogin].trim();
+        if (developerAccountId && oldHomepod === newHomepod && oldAccountEmail === newAccountEmail) {
           self._developerAccountId = developerAccountId;
           done();
         } else {
@@ -263,7 +279,7 @@ module.exports = yeoman.generators.Base.extend({
                   helpers.lament(self, 'Invalid credentials. Retry password (or Ctrl-C to quit).', err.originalError)
                   return getDeveloperAccountId();
                 } else {
-                  helpers.lament(self, (err && (err.message || err.toString())) || "Unknown error! Please try again later.", err);
+                  helpers.lament(self, "Sorry, there was an error: " + (err && (err.message || err.toString())) || "Unknown error! Please try again later.", err);
                   process.exit(1);
                 }
               });
@@ -278,7 +294,7 @@ module.exports = yeoman.generators.Base.extend({
 
       var done = typeof cb === "function" ? cb : this.async();
 
-      if (this._gitInstalled && !this._inGitRepo && this.config.get('createGit') !== false) {
+      if (!this.options.config && this._gitInstalled && !this._inGitRepo && this.config.get('createGit') !== false) {
 
         helpers.promptAndSaveResponse(this, [{
           type: 'confirm',
@@ -301,7 +317,8 @@ module.exports = yeoman.generators.Base.extend({
   configuring: {
 
     saveRc: function() {
-      this.config.set('createGit', this._createGit);
+      if (!this.options.config)
+        this.config.set('createGit', this._createGit);
     },
     
     mozuConfig: function() {
@@ -314,6 +331,8 @@ module.exports = yeoman.generators.Base.extend({
     },
 
     packagejson: function() {
+
+      if (this.options.config) return;
 
       var newPkg = {
         name: this._name,
@@ -343,7 +362,7 @@ module.exports = yeoman.generators.Base.extend({
 
     createRepoIfRequested: function(done) {
       if (typeof done !== "function") done = this.async();
-      if (this._createGit) {
+      if (!this.options.config && this._createGit) {
         quickGitHits.createRepoInDirectory(this.destinationPath(), { repositoryUrl: this._repositoryUrl }, function(err) {
           if (err) {
             throw err;
