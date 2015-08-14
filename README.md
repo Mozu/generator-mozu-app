@@ -33,7 +33,27 @@ Run `yo mozu-app`:
 yo mozu-app
 ```
 
+## Configuring An Existing App
+
+Often you'll find yourself downloading a Mozu App or Arc.js Action from a colleague or from a public repository. You can configure existing code to upload to your Mozu Developer Account just by adding a `mozu.config.json` file in the working directory. The App Generator can do that, and only that, for you if you pass the `--config` option:
+
+```
+$ git clone https://github.com/some-mozu-action/
+  Cloning into 'some-mozu-action'...complete.
+
+$ cd some-mozu-action
+
+$ yo mozu-app --config
+
+```
+
+It will prompt you only for the information it needs to create a configuration file. It will not store your password in plaintext; it only uses your password to download your list of developer accounts at the time that it runs.
+
 ## Options
+
+* `--configure`
+
+  Only create a `mozu.config.json` file. Use this option to add existing code to an application in your developer account.
 
 * `--skip-install`
   
