@@ -233,7 +233,9 @@ module.exports = yeoman.generators.Base.extend({
         var newHomepod = self._homePod;
         var oldAccountEmail = self._mozuConfig.developerAccount && self._mozuConfig.developerAccount.emailAddress && self._mozuConfig.developerAccount.emailAddress.trim();
         var newAccountEmail = self['_' + self.developerInfoKeys.AccountLogin].trim();
-        if (developerAccountId && oldHomepod === newHomepod && oldAccountEmail === newAccountEmail) {
+        var oldSyncAppKey = self._mozuConfig.appKey;
+        var newSyncAppKey = self['_' + self.developerInfoKeys.AppKey];
+        if (developerAccountId && oldHomepod === newHomepod && oldAccountEmail === newAccountEmail && oldSyncAppKey === newSyncAppKey) {
           self._developerAccountId = developerAccountId;
           done();
         } else {
