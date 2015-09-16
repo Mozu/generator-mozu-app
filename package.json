@@ -26,18 +26,18 @@
     "mozu-app"
   ],
   "dependencies": {
-    "chalk": "^1.1.0",
+    "chalk": "^1.1.1",
     "lodash.merge": "^3.3.2",
     "mosay": "^2.1.0",
     "mozu-metadata": "latest",
-    "mozu-node-sdk": "^1.18.15223-0",
+    "mozu-node-sdk": "^1.18.15223-2",
     "quick-git-hits": "^0.1.1",
-    "semver": "^5.0.1",
+    "semver": "^5.0.3",
     "update-notifier": "^0.5.0",
-    "yeoman-generator": "^0.20.2"
+    "yeoman-generator": "^0.20.3"
   },
   "devDependencies": {
     "mocha": "*",
-    "rimraf": "^2.4.2"
+    "rimraf": "^2.4.3"
   }
 }
