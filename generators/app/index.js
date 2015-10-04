@@ -172,9 +172,9 @@ module.exports = yeoman.generators.Base.extend({
       function done() {
         self._homePod = XDMetadata.environments[self._mozuEnv].homeDomain;
         self.developerInfoKeys = [
-          'AccountLogin',
-          'AppKey',
-          'SharedSecret'
+          'AccountLogin'
+          // 'AppKey',
+          // 'SharedSecret'
         ].reduce(function(memo, keyName) {
           memo[keyName] = self._mozuEnv + '_' + keyName;
           return memo;
@@ -213,19 +213,20 @@ module.exports = yeoman.generators.Base.extend({
         message: 'Enter your Developer Account login email:',
         filter: helpers.trimString,
         store: true
-      }, {
-        type: 'input',
-        name: this.developerInfoKeys.AppKey,
-        message: 'Application Key for your developer sync app:',
-        filter: helpers.trimString,
-        store: true
-      }, { 
-        type: 'password',
-        name: this.developerInfoKeys.SharedSecret,
-        message: 'Shared Secret for your developer sync app:',
-        filter: helpers.trimString,
-        store: true
       }];
+      // }, {
+      //   type: 'input',
+      //   name: this.developerInfoKeys.AppKey,
+      //   message: 'Application Key for your developer sync app:',
+      //   filter: helpers.trimString,
+      //   store: true
+      // }, { 
+      //   type: 'password',
+      //   name: this.developerInfoKeys.SharedSecret,
+      //   message: 'Shared Secret for your developer sync app:',
+      //   filter: helpers.trimString,
+      //   store: true
+      // }];
 
       helpers.promptAndSaveResponse(self, prompts, function getDeveloperAccountId() {
         var developerAccountId = self.options.developerAccountId || self._mozuConfig.developerAccountId;
@@ -233,9 +234,9 @@ module.exports = yeoman.generators.Base.extend({
         var newHomepod = self._homePod;
         var oldAccountEmail = self._mozuConfig.developerAccount && self._mozuConfig.developerAccount.emailAddress && self._mozuConfig.developerAccount.emailAddress.trim();
         var newAccountEmail = self['_' + self.developerInfoKeys.AccountLogin].trim();
-        var oldSyncAppKey = self._mozuConfig.appKey;
-        var newSyncAppKey = self['_' + self.developerInfoKeys.AppKey];
-        if (developerAccountId && oldHomepod === newHomepod && oldAccountEmail === newAccountEmail && oldSyncAppKey === newSyncAppKey) {
+        // var oldSyncAppKey = self._mozuConfig.appKey;
+        // var newSyncAppKey = self['_' + self.developerInfoKeys.AppKey];
+        if (developerAccountId && oldHomepod === newHomepod && oldAccountEmail === newAccountEmail /*&& oldSyncAppKey === newSyncAppKey*/) {
           self._developerAccountId = developerAccountId;
           done();
         } else {
@@ -250,11 +251,14 @@ module.exports = yeoman.generators.Base.extend({
             helpers.remark(self, 'Looking up developer accounts...');
             var context = helpers.makeSDKContext(self);
             context.developerAccount.password = self._password;
+            delete context.developerAccountId;
             var p = SDK.client(context, { plugins: [require('mozu-node-sdk/plugins/fiddler-proxy')] })
               .platform()
               .developer()
               .developerAdminUserAuthTicket()
-              .createDeveloperUserAuthTicket(context.developerAccount).then(function(res) {
+              .createDeveloperUserAuthTicket(context.developerAccount, {
+                scope: 'NONE'
+              }).then(function(res) {
                 if (!res.availableAccounts) {
                   helpers.lament(self, "No available accounts found for " + context.developerAccount.emailAddress);
                 } else {
