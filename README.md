@@ -4,9 +4,6 @@ Maintainer: [James Zetlen](https://github.com/zetlen)
 
 A Mozu App Generator that scaffolds a directory with some basic tools common to all types of Mozu App (Integrations, Extensions/Actions, and Themes). 
 
-## This package is currently a prerelease.
-**This contains pre-release code. It may have behaviors or rely on features that don't work in Mozu production environments. Use with caution!**
-
 ![screenshot of generator in action](http://i.imgur.com/bwJfTEW.png)
 
 ## Usage
@@ -25,7 +22,7 @@ npm install -g generator-mozu-app
 
 Make a new directory and `cd` into it:
 ```
-mkdir new-mozu-ext && cd new-mozu-ext
+mkdir new-mozu-app && cd new-mozu-app
 ```
 
 Run `yo mozu-app`:
