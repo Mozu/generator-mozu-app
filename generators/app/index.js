@@ -62,6 +62,22 @@ module.exports = yeoman.generators.Base.extend({
       desc: 'Only create a mozu.config.json file. Use this option for configuring existing projects to work with your own developer account.'
     });
 
+    this.option('composed', {
+      hide: true,
+      desc: 'Flag to prevent running the same setup twice',
+      type: Boolean
+    });
+
+    this.option('package-name', {
+      desc: 'Flag for generators composing this one to pass a default package name',
+      hide: true
+    })
+
+    this.option('package-description', {
+      desc: 'Flag for generators composing this one to pass a default package description',
+      hide: true
+    })
+
     try {
       this._package = this.fs.readJSON(this.destinationPath('package.json'), {});
     } catch(e) {
@@ -94,19 +110,21 @@ module.exports = yeoman.generators.Base.extend({
       }.bind(this));
     },
     displayMozuBanner: function(message) {
-      if (!message) message = this.options.intro;
-      if (this.options.config) {
-        message = "Follow the prompts to configure this project to connect to the Mozu APIs."
-      } else if (this.options['skip-prompts']) {
-        if (!this.fs.exists('mozu.config.json')) {
-          message = 'You cannot skip prompts if you have never run this generator in the current directory! Run again without the --skip-prompts or --quick options.';
-          this.log(mosay(message));
-          throw new Error(message);
+      if (!this.options.composed) {
+        if (!message) message = this.options.intro;
+        if (this.options.config) {
+          message = "Follow the prompts to configure this project to connect to the Mozu APIs."
+        } else if (this.options['skip-prompts']) {
+          if (!this.fs.exists('mozu.config.json')) {
+            message = 'You cannot skip prompts if you have never run this generator in the current directory! Run again without the --skip-prompts or --quick options.';
+            this.log(mosay(message));
+            throw new Error(message);
+          }
+          message += '\n\nSkipping prompts step because --skip-prompts was specified. Rerunning...';
         }
-        message += '\n\nSkipping prompts step because --skip-prompts was specified. Rerunning...';
-      }
 
-      this.log(mosay(message));
+        this.log(mosay(message));
+      }
     }
   },
 
@@ -119,7 +137,9 @@ module.exports = yeoman.generators.Base.extend({
         type: 'input',
         name: 'name',
         message: 'Application package name (letters, numbers, dashes):',
-        default: this._package.name || this.appname && this.appname.replace(/\s/g,'-'),
+        default: this.options['package-name'] ||
+                  this._package.name ||
+                  this.appname && this.appname.replace(/\s/g,'-'),
         filter: helpers.trimString,
         validate: function(name) {
           return !!name.match(/^[A-Za-z0-9\-_\.]+$/) || 'That may not be a legal npm package name.';
