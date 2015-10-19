@@ -137,18 +137,23 @@ module.exports = yeoman.generators.Base.extend({
         type: 'input',
         name: 'name',
         message: 'Application package name (letters, numbers, dashes):',
-        default: this.options['package-name'] ||
-                  this._package.name ||
+        default: this._package.name ||
                   this.appname && this.appname.replace(/\s/g,'-'),
         filter: helpers.trimString,
         validate: function(name) {
           return !!name.match(/^[A-Za-z0-9\-_\.]+$/) || 'That may not be a legal npm package name.';
-        }
+        },
+        when: function(answers) {
+          return !this.options['package-name'];
+        }.bind(this)
       }, {
         type: 'input',
         name: 'description',
         message: 'Short description:',
-        default: this._package.description || ''
+        default: this._package.description || '',
+        when: function(answers) {
+          return !this.options['package-description'];
+        }.bind(this)
       }, {
         type: 'input',
         name: 'version',
@@ -170,7 +175,12 @@ module.exports = yeoman.generators.Base.extend({
 
       var prompts = this.options.config ? configPrompts : packagePrompts.concat(configPrompts);
 
-      helpers.promptAndSaveResponse(this, prompts, done);
+      helpers.promptAndSaveResponse(this, prompts, function() {
+        this._description = this._description ||
+                            this.options['package-description'];
+        this._name = this._name || this.options['package-name'];
+        done();
+      }.bind(this));
 
     },
 
