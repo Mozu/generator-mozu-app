@@ -1,4 +1,5 @@
 'use strict';
+var path = require('path');
 var url = require('url');
 var yeoman = require('yeoman-generator');
 var chalk = require('chalk');
@@ -97,7 +98,7 @@ module.exports = yeoman.generators.Base.extend({
 
   initializing: {
     notifyUpdates: function() {
-      require('update-notifier')({ pkg: require('../../package.json'), updateCheckInterval: 1}).notify({ defer: false });
+      require('update-notifier')({ pkg: require(path.resolve(__dirname, '../../package.json')), updateCheckInterval: 1}).notify({ defer: false });
     },
     acquireGitStatus: function() {
       var done = this.async();

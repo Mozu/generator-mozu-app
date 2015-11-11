@@ -30,11 +30,11 @@
     "lodash.merge": "^3.3.2",
     "mosay": "^2.1.0",
     "mozu-metadata": "latest",
-    "mozu-node-sdk": "^1.18.15223-5",
+    "mozu-node-sdk": "^2.0.0",
     "quick-git-hits": "^0.1.1",
     "semver": "^5.0.3",
     "update-notifier": "^0.5.0",
-    "yeoman-generator": "^0.20.3"
+    "yeoman-generator": "^0.21.1"
   },
   "devDependencies": {
     "mocha": "*",
