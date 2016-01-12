@@ -1,6 +1,31 @@
+language: objective-c
+os:
+- linux
+- osx
 sudo: false
-language: node_js
-node_js:
-  - 'iojs'
-  - '0.12'
-  - '0.10'
+branches:
+  except:
+  - /^v[0-9]/
+env:
+  matrix:
+  - TRAVIS_NODE_VERSION="4.1"
+  - TRAVIS_NODE_VERSION="4.2"
+  - TRAVIS_NODE_VERSION="stable"
+cache:
+  directories:
+  - node_modules
+before_script:
+- rm -rf ~/.nvm && git clone https://github.com/creationix/nvm.git ~/.nvm && (cd ~/.nvm
+  && git checkout `git describe --abbrev=0 --tags`) && source ~/.nvm/nvm.sh && nvm
+  install $TRAVIS_NODE_VERSION
+- npm install -g npm
+- npm install
+- git config --global user.email "travis-ci-build@volusion.com"
+- git config --global user.name "Travis CI Build"
+script:
+- node --version
+- npm --version
+- if [ -n "TRAVIS_TAG" ]; then npm run ci-build-stable; else npm run ci-build; fi
+notifications:
+  slack:
+    secure: gbmd5M0kbTVLr0uHUdFQLvFeTNxTZmrBf0+I9znW3f2VNIQKzGRkuReabrSJNNgBEfNEHFIYJPUkBldmJhfUY375uHTpmB7fXxD24RuqDQmbCTjM7b79OkC3nn9Dm+TiUaNu4+iE2MA50jmIUryddZLf+bs8lXG9iJCdlkqFVDFThDq3i7qmwBPN3FPtnSGQbOR4Vs5wpryz3Ti+fkUikrJD3WVO14I+jolWUMzEsdNVKJ2IqqMXb+ODVFcMOS2A4hG+FHB3QAVpXnPQui583zihRhvFlKioCLZQHGnB7RJ/Ssa8iJIkobEFna6swJBYHnX1qfRmbIxkMvjdg4lSkJW2mZ1Ngv3f7vsMf/UTHd/3HOlq3U/tDOwMo7/RPuCa+05A4+sR0aBvkB9mWMQTq97Zy5qeuGFpBhSskNOQU3Xa8BFzImqbajCFypmnXRvEX0poj2awHYK5ygnR0IWWRH3DSsDm62SHuuZs0/vvRZo/e8wCpZrNCBVQD/o30ogfda2azgp2DBi3QU21TFZkji2rVGdCoj8uNbm4PiBNX68GTOzxyY17n5ArPjFos2YsijM4wLYVo+Nml35/HzPbA5aCn0Fd3tacwSDvcfFNHy3XV4I/It1PlCcvHMuIGzZXCdHBIPExkIXgnlQu06autpm0LJAt64T29b3tK9WMa48=
