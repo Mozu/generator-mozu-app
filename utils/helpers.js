@@ -27,7 +27,7 @@ module.exports = {
     return {
       appKey: self['_' + self.developerInfoKeys.AppKey],
       sharedSecret: self['_' + self.developerInfoKeys.SharedSecret],
-      baseUrl: self._homePod,
+      baseUrl: process.env.MOZU_HOMEPOD || self._homePod,
       developerAccountId: self._developerAccountId,
       developerAccount: {
         emailAddress: self['_' + self.developerInfoKeys.AccountLogin]

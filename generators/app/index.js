@@ -17,10 +17,10 @@ try {
   PROD_HOMEPOD = XDMetadata.environments[PROD_NAME].homeDomain;
 } catch(e) {} // handled below
 
-module.exports = yeoman.generators.Base.extend({
+module.exports = yeoman.Base.extend({
 
   constructor: function () {
-    yeoman.generators.Base.apply(this, arguments);
+    yeoman.Base.apply(this, arguments);
 
     // This option adds support for non-production environments
     this.option('internal', {
@@ -251,7 +251,7 @@ module.exports = yeoman.generators.Base.extend({
       //   message: 'Application Key for your developer sync app:',
       //   filter: helpers.trimString,
       //   store: true
-      // }, { 
+      // }, {
       //   type: 'password',
       //   name: this.developerInfoKeys.SharedSecret,
       //   message: 'Shared Secret for your developer sync app:',
@@ -273,7 +273,7 @@ module.exports = yeoman.generators.Base.extend({
         } else {
           helpers.promptAndSaveResponse(self, [{
             type: 'password',
-            name: 'password', 
+            name: 'password',
             message: 'Developer Account password:',
             validate: function(str) {
               return !!str;
@@ -346,7 +346,7 @@ module.exports = yeoman.generators.Base.extend({
 
       } else {
         done();
-      } 
+      }
 
     }
   },
@@ -357,7 +357,7 @@ module.exports = yeoman.generators.Base.extend({
       if (!this.options.config)
         this.config.set('createGit', this._createGit);
     },
-    
+
     mozuConfig: function() {
       if (!this.options['skip-prompts']) {
         this.fs.writeJSON(
