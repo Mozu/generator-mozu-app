@@ -1,6 +1,5 @@
 'use strict';
 
-var merge = require('lodash.merge');
 var chalk = require('chalk');
 module.exports = {
   addAsPrivateProps: function(target, source) {
@@ -44,7 +43,9 @@ module.exports = {
       return result;
     }, {});
   },
-  merge: merge,
+  merge: function() {
+    return Object.assign.apply(Object, arguments);
+  },
   remark: function(ctx, str) {
     ctx.log(chalk.green('>> ') + str + '\n');
   },
