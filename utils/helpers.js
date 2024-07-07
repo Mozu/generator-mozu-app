@@ -1,58 +1,69 @@
 'use strict';
 
-var chalk = require('chalk');
-module.exports = {
-  addAsPrivateProps: function(target, source) {
-    Object.keys(source).forEach(function(key) {
-      target['_' + key] = source[key];
+import chalk from 'chalk';
+import util from 'util';
+
+const helpers = {
+  addAsPrivateProps(target, source) {
+    Object.keys(source).forEach(key => {
+      target[`_${key}`] = source[key];
     });
   },
-  promptAndSaveResponse: function(generator, prompts, cb) {
+
+  promptAndSaveResponse(generator, prompts, cb) {
     if (generator.options['skip-prompts']) {
-      prompts.forEach(function(prompt) {
-        generator['_' + prompt.name] = (typeof prompt.default === 'function') ? prompt.default() : prompt.default;
+      prompts.forEach(prompt => {
+        generator[`_${prompt.name}`] = typeof prompt.default === 'function' ? prompt.default() : prompt.default;
       });
       cb();
     } else {
-      generator.prompt(prompts, function(answers) {
-        Object.keys(answers).forEach(function(key) {
-          generator['_' + key] = answers[key];
+      generator.prompt(prompts).then(answers => {
+        Object.keys(answers).forEach(key => {
+          generator[`_${key}`] = answers[key];
         });
         cb();
       });
     }
   },
-  makeSDKContext: function(self) {
+
+  makeSDKContext(self) {
     return {
-      appKey: self['_' + self.developerInfoKeys.AppKey],
-      sharedSecret: self['_' + self.developerInfoKeys.SharedSecret],
+      appKey: self[`_${self.developerInfoKeys.AppKey}`],
+      sharedSecret: self[`_${self.developerInfoKeys.SharedSecret}`],
       baseUrl: process.env.MOZU_HOMEPOD || self._homePod,
       developerAccountId: self._developerAccountId,
       developerAccount: {
-        emailAddress: self['_' + self.developerInfoKeys.AccountLogin]
+        emailAddress: self[`_${self.developerInfoKeys.AccountLogin}`]
       },
       workingApplicationKey: self._applicationKey
     };
   },
-  trimString: function(str) {
+
+  trimString(str) {
     return str.trim();
   },
-  trimAll: function(obj) {
-    return Object.keys(obj).reduce(function(result, k) {
-      result[k] = (typeof obj[k] === 'string') ? obj[k].trim() : obj[k];
+
+  trimAll(obj) {
+    return Object.keys(obj).reduce((result, k) => {
+      result[k] = typeof obj[k] === 'string' ? obj[k].trim() : obj[k];
       return result;
     }, {});
   },
-  merge: function() {
-    return Object.assign.apply(Object, arguments);
+
+  merge(...args) {
+    return Object.assign(...args);
   },
-  remark: function(ctx, str) {
+
+  remark(ctx, str) {
     ctx.log(chalk.green('>> ') + str + '\n');
   },
-  lament: function(ctx, str, e) {
-    ctx.log(chalk.bold.red(str + '\n'));
-    if (process.env.NODE_DEBUG && process.env.NODE_DEBUG.indexOf('mozu-app') !== -1) {
-      ctx.log(e && chalk.bold.red('Details: \n' + require('util').inspect(e, { depth: 4 })));
+
+  lament(ctx, str, e) {
+    ctx.log(chalk.bold.red(`${str}\n`));
+    if (process.env.NODE_DEBUG && process.env.NODE_DEBUG.includes('mozu-app')) {
+      ctx.log(e && chalk.bold.red(`Details: \n${util.inspect(e, { depth: 4 })}`));
     }
   }
 };
+
+export default helpers;
