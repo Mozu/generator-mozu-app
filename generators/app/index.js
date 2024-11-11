@@ -221,7 +221,7 @@ export default class extends Generator {
         helpers.promptAndSaveResponse(this, [{
           type: 'list',
           name: 'mozuEnv',
-          message: 'Select Mozu environment:',
+          message: 'Select Kibo environment:',
           default: currentMozuEnv,
           choices: environmentNames
         }], done);
