@@ -14,6 +14,8 @@ import notifier  from 'update-notifier';
 import helpers from '../../utils/helpers.js';
 import fiddlerProxy from 'mozu-node-sdk/plugins/fiddler-proxy.js';
 import GruntfileEditor from 'gruntfile-editor';
+import cliWebLogin from '@kibocommerce/cli-web-login';
+const {authenticate} = cliWebLogin;
 import fs from 'fs';
 
 
@@ -236,6 +238,9 @@ export default class extends Generator {
   }
 
   _promptForDeveloperAccount() {
+    if (process.env.TEST_WEB_LOGIN){
+      return this._promptForDeveloperAccount2();
+    }
     return new Promise(resolve => {
       const prompts = [{
         type: 'input',
@@ -248,6 +253,32 @@ export default class extends Generator {
       helpers.promptAndSaveResponse(this, prompts, () => this._getDeveloperAccountId(resolve));
     });
   }
+  
+  _promptForDeveloperAccount2() {
+    const newHomePod = this._homePod;
+    if (this.options.developerAccountId && this._mozuConfig.developerAccountId && this._mozuConfig.baseUrl === newHomepod) {
+      this._developerAccountId = this.options.developerAccountId;
+      return Promise.resolve();
+    }
+
+    return new Promise((resolve, reject) => {
+    let login = 'https://login' + 
+      newHomePod
+      .toLowerCase()
+      .replace('https://','')
+      .replace('services','')
+      .replace('home','')
+      .replace('/','') 
+      + '/login';    
+      
+      authenticate(login).then((res) => {
+        return this._lookupDeveloperAccount2(res, resolve)
+      }).catch((err) => {
+        console.log(err);
+        reject(err);
+      });    
+     });
+  }
 
   _getDeveloperAccountId(done) {
     const developerAccountId = this.options.developerAccountId || this._mozuConfig.developerAccountId;
@@ -256,7 +287,7 @@ export default class extends Generator {
     const oldAccountEmail = this._mozuConfig.developerAccount && this._mozuConfig.developerAccount.emailAddress && this._mozuConfig.developerAccount.emailAddress.trim();
     const newAccountEmail = this[`_${this.developerInfoKeys.AccountLogin}`].trim();
 
-    if (developerAccountId && oldHomepod === newHomepod && oldAccountEmail === newAccountEmail) {
+    if (developerAccountId && oldHomepod === newHomepod ) {
       this._developerAccountId = developerAccountId;
       done();
     } else {
@@ -269,6 +300,20 @@ export default class extends Generator {
     }
   }
 
+  _lookupDeveloperAccount2(ticket, done){
+    helpers.remark(this, 'Looking up developer accounts...');
+    const context = helpers.makeSDKContext(this);
+    context['user-claims'] = ticket.accessToken;
+    const refreshToken = ticket.refreshToken;
+    //context[''] = ticket.RefreshToken
+    SDK.client(context, { plugins: [fiddlerProxy] })
+    .platform()
+    .developer()
+    .developerAdminUserAuthTicket()  
+    .refreshDeveloperAuthTicket({developerAccountId: null, RefreshToken: ticket.refreshToken} , { scope: 'NONE' })
+    .then(res => this._handleDeveloperAccounts(res, done))
+    .catch(err => this._handleDeveloperAccountError(err, done));
+  }
   _lookupDeveloperAccount(done) {
     helpers.remark(this, 'Looking up developer accounts...');
     const context = helpers.makeSDKContext(this);

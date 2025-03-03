@@ -26,6 +26,7 @@
     "mozu-app"
   ],
   "dependencies": {
+    "@kibocommerce/cli-web-login": "^1.0.1",
     "chalk": "^5.3.0",
     "gruntfile-editor": "^1.2.1",
     "mozu-metadata": "*",
