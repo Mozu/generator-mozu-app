@@ -201,6 +201,18 @@ export default class extends Generator {
 
   _promptForEnvironment() {
     return new Promise(resolve => {
+      if(process.env.KIBO_TEST_ENVIRONMENT){
+        var envUrl = process.env.KIBO_TEST_ENVIRONMENT;
+        if ( !envUrl.startsWith('http')){
+          envUrl = 'https://' + envUrl;
+        }
+        XDMetadata.environments['KiboTest'] = {
+          
+            "homeDomain": envUrl,
+            "paymentServiceTenantPodDomain": envUrl,
+            "paymentServiceSandboxDomain": envUrl
+          }
+      } 
       const environmentNames = Object.keys(XDMetadata.environments);
       let currentMozuEnv = PROD_NAME;
       let currentHomepod = this._mozuConfig.baseUrl;
