@@ -16,6 +16,7 @@ import fiddlerProxy from 'mozu-node-sdk/plugins/fiddler-proxy.js';
 import GruntfileEditor from 'gruntfile-editor';
 import cliWebLogin from '@kibocommerce/cli-web-login';
 const {authenticate} = cliWebLogin;
+const use_legacy_login = !!process.env.KIBO_LEGACY_LOGIN ;
 import fs from 'fs';
 
 
@@ -250,7 +251,7 @@ export default class extends Generator {
   }
 
   _promptForDeveloperAccount() {
-    if (process.env.TEST_WEB_LOGIN){
+    if (!use_legacy_login){
       return this._promptForDeveloperAccount2();
     }
     return new Promise(resolve => {
@@ -274,7 +275,7 @@ export default class extends Generator {
     }
 
     return new Promise((resolve, reject) => {
-    let login = 'https://login' + 
+    let login = 'https://www' + 
       newHomePod
       .toLowerCase()
       .replace('https://','')
